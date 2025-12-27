@@ -1,37 +1,45 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-// create your first component
+const URL = "https://playground.4geeks.com/todo/todos/luis";
+
 const Home = () => {
 	const [task, setTask] = useState("");
 	const [taskList, setTaskList] = useState([]);
 
+	// Cargar tareas
+	useEffect(() => {
+		fetch(URL)
+			.then(res => res.json())
+			.then(data => {
+				console.log("DATA:", data);
+				setTaskList(data.todos);
+			});
+	}, []);
 
-	const URL = "URL_AQUI"; // No olvidar
-
-
-	// FUNCIÓN PARA AGREGAR TAREAS
+	// Agregar tarea
 	const addTask = async () => {
 		if (task.trim() === "") return;
-		const newTask = { label: task, is_done: false}		
-		await fetch(URL, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify(newTask)
-		});
-		setTaskList([...taskList, newTask]);
-		setTask("");
-	};
-	
 
-	// FUNCIÓN PARA BORRAR TAREAS
-	const deleteTask = async (taskToDelete) => {
-		await fetch(URL, {
+		const response = await fetch(URL, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({label: task, is_done: false})
+		});
+		if(response.ok){
+			const newTask = await response.json();
+			setTaskList([...taskList, newTask]);
+			setTask("");
+		}
+		
+	};
+
+	// Borrar tarea
+	const deleteTask = async (id) => {
+		await fetch(`https://playground.4geeks.com/todo/todos/${id}`, {
 			method: "DELETE"
 		});
-		const newTaskList = taskList.filter((item) => item !== taskToDelete);
-		setTaskList(newTaskList); // Agrego al etado taskList la nueva lista filtrada
+
+		setTaskList(taskList.filter(item => item.id !== id));
 	};
 
 	return (
@@ -40,55 +48,46 @@ const Home = () => {
 			<h1
 				className="text-center mt-5 text-success"
 				style={{ fontSize: "55px", userSelect: "none" }}
-			    >Todo List
+				> Todo List
 			</h1>
 
 			<input
-				type="text"
 				className="form-control w-25 mx-auto"
 				value={task}
-				onChange={(e) => setTask(e.target.value)}
-				onKeyUp={(e) => {
-					if (e.key === "Enter") addTask();
-				}}
+				onChange={e => setTask(e.target.value)}
+				onKeyUp={e => e.key === "Enter" && addTask()}
 			/>
 
-			<div className="d-flex justify-content-center my-3">
-				<button
-					className="btn btn-success p-0"
-					style={{ width: "80px", height: "40px" }}
-					onClick={addTask}
-					>Add Task
-				</button>
-			</div>
+			<ul style={{ listStyle: "none", padding: 0 }}>
+				{taskList.map(item => (
+					<li 
+						key={item.id}
+						className="d-flex align-items-center justify-content-center mt-3"
+						>
+						<p
+							className="text-success"
+							style={{
+								border: "2px solid #000",
+								width: "20%",
+								borderRadius: "8px",
+								fontWeight: "bold",
+								userSelect: "none",
+								marginBottom: 0,
+								padding: "6px"
+							}}
+							> {item.label}
+						</p>
 
-			{/* Renderizando la lista de tareas a traves de map */}
-			{taskList.map((taskItem, index) => (
-				<div
-					key={index}
-					className="d-flex align-items-center justify-content-center"
-				    >
-					<p
-						className="mt-3 text-success"
-						style={{
-							border: "2px solid #000",
-							width: "20%",
-							borderRadius: "8px",
-							fontWeight: "bold",
-							userSelect: "none"
-						}}
-						>{taskItem.label}
-					</p>
-
-					<button
-						type="button"
-						className="btn text-center p-0 btn-close"
-						style={{ width: "60px" }}
-						onClick={() => deleteTask(taskItem)}
-					/>
-				</div>
-			))}
-
+						<button
+							type="button"
+							className="btn btn-close p-0"
+							style={{ width: "60px" }}
+							onClick={() => deleteTask(item.id)}
+							> Delete
+						</button>
+					</li>
+				))}
+			</ul>
 		</div>
 	);
 };

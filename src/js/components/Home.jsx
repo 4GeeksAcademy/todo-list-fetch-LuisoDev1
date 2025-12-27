@@ -5,6 +5,7 @@ import rigoImage from "../../img/rigo-baby.jpg";
 
 //create your first component
 const Home = () => {
+	console.log("soy rigo")
 	return (
 		<div className="text-center">            
 
