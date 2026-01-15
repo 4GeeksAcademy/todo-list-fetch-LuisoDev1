@@ -1,45 +1,60 @@
 import React, { useState, useEffect } from "react";
 
-const URL = "https://playground.4geeks.com/todo/todos/luis";
+const URL = 'https://playground.4geeks.com/todo/todos/luis';
 
+
+// Componente Home
 const Home = () => {
-	const [task, setTask] = useState("");
-	const [taskList, setTaskList] = useState([]);
+	const [isTask, setIsTask] = useState("");
+	const [isTaskList, setIsTaskList] = useState([]);
 
+	
+	
 	// Cargar tareas
 	useEffect(() => {
-		fetch(URL)
+		fetch('https://playground.4geeks.com/todo/todos/luis')
 			.then(res => res.json())
 			.then(data => {
 				console.log("DATA:", data);
-				setTaskList(data.todos);
+				setIsTaskList(data.todos);
 			});
 	}, []);
 
-	// Agregar tarea
+	
+	
+	
+	// Función para agregar tareas
 	const addTask = async () => {
-		if (task.trim() === "") return;
+		
+		if (isTask.trim() === "") return;
 
-		const response = await fetch(URL, {
+		const response = await fetch('https://playground.4geeks.com/todo/todos/luis', {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({label: task, is_done: false})
+			body: JSON.stringify(
+				{
+					label: task, 
+					is_done: false
+				})
 		});
+		
 		if(response.ok){
 			const newTask = await response.json();
-			setTaskList([...taskList, newTask]);
-			setTask("");
+			setIsTaskList([...isTaskList, newTask]);
+			setIsTask("");
 		}
 		
 	};
 
-	// Borrar tarea
+	
+	
+	// Función para borrar tareas
 	const deleteTask = async (id) => {
 		await fetch(`https://playground.4geeks.com/todo/todos/${id}`, {
 			method: "DELETE"
 		});
 
-		setTaskList(taskList.filter(item => item.id !== id));
+		setIsTaskList(isTaskList.filter((item) => item.id !== id));
 	};
 
 	return (
@@ -47,25 +62,21 @@ const Home = () => {
 
 			<h1
 				className="text-center mt-5 text-success"
-				style={{ fontSize: "55px", userSelect: "none" }}
+				style={{ fontSize:"55px", userSelect:"none" }}
 				> Todo List
 			</h1>
 
 			<input
 				className="form-control w-25 mx-auto"
-				value={task}
-				onChange={e => setTask(e.target.value)}
-				onKeyUp={e => e.key === "Enter" && addTask()}
+				value={isTask}
+				onChange={(e) => setIsTask(e.target.value)}
+				onKeyUp={(e) => e.key === "Enter" && addTask()}
 			/>
 
-			<ul style={{ listStyle: "none", padding: 0 }}>
-				{taskList.map(item => (
-					<li 
-						key={item.id}
-						className="d-flex align-items-center justify-content-center mt-3"
-						>
-						<p
-							className="text-success"
+			<ul style={{ listStyle:"none", padding:0 }}>
+				{isTaskList.map((item) => (
+					<li key={item.id} className="d-flex align-items-center justify-content-center mt-3">
+						<p className="text-success"
 							style={{
 								border: "2px solid #000",
 								width: "20%",
@@ -81,9 +92,9 @@ const Home = () => {
 						<button
 							type="button"
 							className="btn btn-close p-0"
-							style={{ width: "60px" }}
+							style={{ width:"60px" }}
 							onClick={() => deleteTask(item.id)}
-							> Delete
+							> Delete Task
 						</button>
 					</li>
 				))}
