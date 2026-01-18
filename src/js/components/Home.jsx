@@ -2,35 +2,39 @@ import React, { useState, useEffect } from "react";
 
 const URL = 'https://playground.4geeks.com/todo/todos/luis';
 
+console.log("RENDER");
 
 // Componente Home
 const Home = () => {
 	const [taskInputValue, setTaskInputValue] = useState("");
 	const [taskList, setTaskList] = useState([]);
-
-	
 	
 	// Cargar tareas al iniciar la app
 	useEffect(() => {
-		fetch('https://playground.4geeks.com/todo/todos/luis')
-			.then((res) => res.json())
-			.then((data) => {
-				console.log("DATA:", data);
+  		const init = async () => {
+    		try {
 				
-				/*Aqui cargamos el estado de la lista con lo que
-				está en la API*/
-				if(Array.isArray(data)){
-					setTaskList(data);
-				}
-				else if(Array.isArray(data.todos)){
-					setTaskList(data.todos)
-				}
-				else {
-					setTaskList([])
-				}
+				// Crear usuario, si ya existe la API no se rompe
+				await fetch("https://playground.4geeks.com/todo/users/luis", { method: "POST" });
+
+				// Traer las tareas
+				const res = await fetch("https://playground.4geeks.com/todo/todos/luis");
+					if (!res.ok) {
+						setTaskList([]);
+						return;
+					}				
+					const data = await res.json();
+					setTaskList(Array.isArray(data.todos) ? data.todos : []);
 				
-			});
-	}, []);
+    		} catch (error) {
+      		
+				console.error("Error cargando tareas:", error);
+      			setTaskList([]);
+   			}
+  		};
+
+  init();
+}, []);
 
 	
 	
@@ -69,6 +73,8 @@ const Home = () => {
 
 		setTaskList(taskList.filter((item) => item.id !== id));
 	};
+
+	console.log("RENDER")
 
 	return (
 		<div className="text-center d-flex flex-column"style={{minWidth:"33.3%"}}>
