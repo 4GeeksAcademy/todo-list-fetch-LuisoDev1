@@ -12,19 +12,21 @@ const Home = () => {
 	// Cargar tareas al iniciar la app
 	useEffect(() => {
   		const init = async () => {
-    		try {
-				
-				// Crear usuario, si ya existe la API no se rompe
-				await fetch("https://playground.4geeks.com/todo/users/luis", { method: "POST" });
+    		try {				
+				// Checando si existe el usuario Luis en la API
+				const resp = await fetch("https://playground.4geeks.com/todo/users/luis");
 
-				// Traer las tareas
-				const res = await fetch("https://playground.4geeks.com/todo/todos/luis");
-					if (!res.ok) {
-						setTaskList([]);
-						return;
-					}				
-					const data = await res.json();
-					setTaskList(Array.isArray(data.todos) ? data.todos : []);
+				// Si la respuesta es que no existe el usuario Luis, entonces lo creamos
+				if (!resp.ok) {
+					const createdResp = await fetch("https://playground.4geeks.com/todo/todos/luis", {method:'POST'});
+				}
+
+				if(createdResp.ok){
+					init();
+					
+					setTaskList(Array.isArray(createdResp)? createdResp: [createdResp]);
+
+				}
 				
     		} catch (error) {
       		
@@ -32,10 +34,7 @@ const Home = () => {
       			setTaskList([]);
    			}
   		};
-
-  init();
 }, []);
-
 	
 	
 	// Función para agregar tareas
@@ -89,27 +88,25 @@ const Home = () => {
 					marginBottom:"20px",
 					fontSize:"0.7em", 
 					minHeight:"1.5em",
-					border:"1px solid #000",
 					borderRadius:"3px"}}> 
 					{taskInputValue} 
 				</p>
-			</div>
-			<input
-				className="form-control w-25 mx-auto"
+			</div> 
+				<input 
+				className="w-25 mx-auto"
 				placeholder="add a task"
 				value={taskInputValue}
 				onChange={(e) => setTaskInputValue(e.target.value)}
 				onKeyUp={(e) => e.key === "Enter" && addTask()}
-			/>
+				/>
 
-			<ul style={{ listStyle:"none", padding:0 }}>
+			<ul style={{ listStyle:"none", padding:0}}>
 				{taskList.map((item) => (
 					<li key={item.id} className="d-flex align-items-center justify-content-center mt-3">
-						<p className="text-success"
+						<p 
 							style={{
-								border: "2px solid #000",
-								width: "20%",
-								borderRadius: "8px",
+								border:"1px solid #423e3e",
+								width: "25%",							
 								fontWeight: "bold",
 								userSelect: "none",
 								marginBottom: 0,
@@ -121,9 +118,9 @@ const Home = () => {
 						<button
 							type="button"
 							className="btn btn-danger btn-sm ms-2"
-							style={{ width:"60px" }}
+							style={{ width:"80px" }}
 							onClick={() => deleteTask(item.id)}
-							> Delete Task
+							> Delete Tas
 						</button>
 					</li>
 				))}
